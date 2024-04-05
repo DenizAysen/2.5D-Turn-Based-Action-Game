@@ -1,27 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    #region Serialized Fields
     [SerializeField] private int speed;
     [SerializeField] private Animator anim;
     [SerializeField] private SpriteRenderer playerSprite;
     [SerializeField] private LayerMask grassLayer;
     [SerializeField] private int stepsInGrass;
+    [SerializeField] private int minStepsToEncounter;
+    [SerializeField] private int maxStepsToEncounter;
+    #endregion
 
+    #region Privates
     private PlayerControls _playerControls;
     private Rigidbody _rigidbody;
     private Vector3 _movement;
-    private float _x,_z;
+    private float _x, _z;
     private bool _movingInGrass;
     private float _stepTimer;
+    private int _stepsToEnCounter;
 
+    #region Consts
     private const string IS_WALK = "IsWalk";
-    private const float _timePerStep = .5f;
+    private const string BATTLE_SCENE = "BattleScene";
+    private const float TIME_PER_STEP = .5f;  
+    #endregion
+    #endregion
     private void Awake()
     {
         _playerControls = new PlayerControls();
+        CalculateStepsToNextEncounter();
     }
     private void OnEnable()
     {
@@ -60,11 +72,20 @@ public class PlayerController : MonoBehaviour
         if(_movingInGrass) 
         {
             _stepTimer += Time.fixedDeltaTime;
-            if(_stepTimer > _timePerStep)
+            if(_stepTimer > TIME_PER_STEP)
             {
                 _stepTimer = 0;
                 stepsInGrass++;
+
+                if(stepsInGrass >= _stepsToEnCounter)
+                {
+                    SceneManager.LoadScene(BATTLE_SCENE);
+                }
             }
         }
+    }
+    private void CalculateStepsToNextEncounter()
+    {
+        _stepsToEnCounter = Random.Range(minStepsToEncounter, maxStepsToEncounter);
     }
 }
