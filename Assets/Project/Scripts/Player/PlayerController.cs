@@ -7,13 +7,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int speed;
     [SerializeField] private Animator anim;
     [SerializeField] private SpriteRenderer playerSprite;
+    [SerializeField] private LayerMask grassLayer;
+    [SerializeField] private int stepsInGrass;
 
     private PlayerControls _playerControls;
     private Rigidbody _rigidbody;
     private Vector3 _movement;
     private float _x,_z;
+    private bool _movingInGrass;
+    private float _stepTimer;
 
     private const string IS_WALK = "IsWalk";
+    private const float _timePerStep = .5f;
     private void Awake()
     {
         _playerControls = new PlayerControls();
@@ -42,11 +47,24 @@ public class PlayerController : MonoBehaviour
         }
         if(_x != 0 && _x > 0)
         {
-            playerSprite.flipY = false;
+            playerSprite.flipX = false;
         }
     }
     private void FixedUpdate()
     {
         _rigidbody.MovePosition(transform.position + _movement * speed * Time.fixedDeltaTime);
+
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 1f, grassLayer);
+        _movingInGrass = colliders.Length != 0 && _movement != Vector3.zero;
+
+        if(_movingInGrass) 
+        {
+            _stepTimer += Time.fixedDeltaTime;
+            if(_stepTimer > _timePerStep)
+            {
+                _stepTimer = 0;
+                stepsInGrass++;
+            }
+        }
     }
 }
