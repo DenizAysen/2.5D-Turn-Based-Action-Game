@@ -11,7 +11,7 @@ public class EnemyManager : MonoBehaviour
     private const float LEVEL_MODIFIER = 0.5f;
     private void Awake()
     {
-        GenerateEnemyByName("Slime", 10);
+        GenerateEnemyByName("Slime", 1);
     }
     private void GenerateEnemyByName(string enemyName , int level) 
     {
@@ -36,6 +36,7 @@ public class EnemyManager : MonoBehaviour
 
         } 
     }
+    public List<Enemy> GetCurrentEnemies() => currentEnemies;
 }
 [Serializable]
 public class Enemy

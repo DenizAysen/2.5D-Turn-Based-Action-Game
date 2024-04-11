@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PartManager : MonoBehaviour
+public class PartyManager : MonoBehaviour
 {
     [SerializeField] private PartyMemberInfo[] allMembers;
     [SerializeField] private List<PartyMember> currentParty;
@@ -32,6 +32,10 @@ public class PartManager : MonoBehaviour
                 currentParty.Add(partyMember);
             }
         }
+    }
+    public List<PartyMember> GetCurrentParty()
+    {
+        return currentParty;
     }
 }
 [Serializable]
