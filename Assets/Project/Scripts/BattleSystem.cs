@@ -65,7 +65,7 @@ public class BattleSystem : MonoBehaviour
                 currentEnemies[i].Strength, currentEnemies[i].Initiative, currentEnemies[i].Level, false);
 
             BattleVisuals tempBattleVisuals = Instantiate(currentEnemies[i].EnemyVisualPrefab,
-                enemySpawnPoints[i].position, Quaternion.identity).transform.GetChild(0).GetComponent<BattleVisuals>();
+                enemySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
 
             tempEntity.BattleVisuals = tempBattleVisuals;
 

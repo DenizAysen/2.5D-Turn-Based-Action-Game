@@ -16,5 +16,5 @@ MonoBehaviour:
   BaseHealth: 1
   BaseStr: 1
   BaseInitiative: 1
-  EnemyVisualPrefab: {fileID: 6456842301957862251, guid: 7d79c5e2d3e0d994d8c2b366528ed33c,
+  EnemyVisualPrefab: {fileID: 9190012682090108294, guid: 938f3a3e6a5f72a44b1bfe8121c62b9c,
     type: 3}
