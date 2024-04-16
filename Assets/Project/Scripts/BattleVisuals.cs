@@ -22,10 +22,10 @@ public class BattleVisuals : MonoBehaviour
     private const string LEVEL_ABB = "Lvl: ";
     private const string IS_ATTACK_PARAM = "IsAttack";
     private const string IS_HIT_PARAM = "IsHit";
-    private const string IS_DEAD_PARAM = "IsDead"; 
+    private const string IS_DEAD_PARAM = "IsDead";
     #endregion
     #endregion
-    void Start()
+    private void Awake()
     {
         _animator = GetComponent<Animator>();
     }

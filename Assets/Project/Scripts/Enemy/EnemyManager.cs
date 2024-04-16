@@ -11,7 +11,7 @@ public class EnemyManager : MonoBehaviour
     private const float LEVEL_MODIFIER = 0.5f;
     private void Awake()
     {
-        GenerateEnemyByName("Slime", 1);
+        GenerateEnemyByName("Slime", 25);
     }
     private void GenerateEnemyByName(string enemyName , int level) 
     {
