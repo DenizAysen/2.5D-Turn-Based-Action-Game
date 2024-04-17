@@ -14,6 +14,7 @@ public class BattleSystem : MonoBehaviour
 
     private const string ACTION_MESSAGE = "'s Action";
     private const string WIN_MESSAGE = "You win";
+    private const string LOSE_MESSAGE = "Your party has been defeated";
     private const int TURN_DURATION = 2;
     #endregion
 
@@ -59,19 +60,22 @@ public class BattleSystem : MonoBehaviour
 
         for (int i = 0; i < allBattlers.Count; i++)
         {
-            switch (allBattlers[i].battleAction)
+            if(battleState == BattleState.Battle)
             {
-                case Action.Attack:
-                    yield return StartCoroutine(AttackRoutine(i));
-                    break;
-                case Action.Run:
+                switch (allBattlers[i].battleAction)
+                {
+                    case Action.Attack:
+                        yield return StartCoroutine(AttackRoutine(i));
+                        break;
+                    case Action.Run:
 
-                    break;
+                        break;
 
-                default:
-                    Debug.Log("Incorrect battle action");
-                    break;
-            }
+                    default:
+                        Debug.Log("Incorrect battle action");
+                        break;
+                }
+            }          
         }
         if (battleState == BattleState.Battle)
         {
@@ -87,13 +91,17 @@ public class BattleSystem : MonoBehaviour
         if (allBattlers[index].IsPlayer)
         {
             BattleEntities curAttacker = allBattlers[index];
+            if (allBattlers[curAttacker.Target].IsPlayer  || curAttacker.Target >= allBattlers.Count)
+            {
+                curAttacker.SetTarget(GetRandomEnemy());
+            }
             BattleEntities curTarget = allBattlers[curAttacker.Target];
             AttackAction(curAttacker, curTarget);
             yield return new WaitForSeconds(TURN_DURATION);
 
             if(curTarget.CurrentHealth <= 0)
             {
-                bottomText.text = string.Format("{0} defeated {1}", curAttacker, curTarget);
+                bottomText.text = string.Format("{0} defeated {1}", curAttacker.Name, curTarget.Name);
                 yield return new WaitForSeconds(TURN_DURATION);
 
                 enemyBattlers.Remove(curTarget);
@@ -110,6 +118,32 @@ public class BattleSystem : MonoBehaviour
                 }
             }
           
+        }
+
+        else
+        {
+            BattleEntities curAttacker = allBattlers[index];
+            curAttacker.SetTarget(GetRandomPartyMember());
+            BattleEntities curTarget = allBattlers[curAttacker.Target];
+
+            AttackAction(curAttacker, curTarget);
+            yield return new WaitForSeconds(TURN_DURATION);
+
+            if(curTarget.CurrentHealth <= 0)
+            {
+                bottomText.text = string.Format("{0} defeated {1}", curAttacker.Name, curTarget.Name);
+                yield return new WaitForSeconds(TURN_DURATION);
+                playerBattlers.Remove(curTarget);
+                allBattlers.Remove(curTarget);
+
+                if(playerBattlers.Count <= 0)
+                {
+                    battleState = BattleState.Lost;
+                    bottomText.text = LOSE_MESSAGE;
+                    yield return new WaitForSeconds(TURN_DURATION);
+                    Debug.Log("Gaem over");
+                }
+            }
         }
         //yield return null;
     }
@@ -187,8 +221,9 @@ public class BattleSystem : MonoBehaviour
             enemySelectionButtons[i].SetActive(true);
             enemySelectionButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = enemyBattlers[i].Name;
         }
-    } 
+    }
     #endregion
+    #region Combat
     public void SelectEnemy(int currentEnemy)
     {
         BattleEntities currentPlayerEntity = playerBattlers[_currentPlayer];
@@ -197,7 +232,7 @@ public class BattleSystem : MonoBehaviour
         currentPlayerEntity.battleAction = Action.Attack;
         _currentPlayer++;
 
-        if(_currentPlayer >= playerBattlers.Count)
+        if (_currentPlayer >= playerBattlers.Count)
         {
             Debug.Log("Start Battle");
             StartCoroutine(BattleRoutine());
@@ -216,8 +251,29 @@ public class BattleSystem : MonoBehaviour
         currentTarget.CurrentHealth -= damage;
         currentTarget.BattleVisuals.PlayHitAnimation();
         currentTarget.UpdateUI();
-        bottomText.text = string.Format("{0} attacks {1} for {2} damage", currentAttacker.Name , currentTarget.Name , damage);
+        bottomText.text = string.Format("{0} attacks {1} for {2} damage", currentAttacker.Name, currentTarget.Name, damage);
+    } 
+    private int GetRandomPartyMember()
+    {
+        List<int> partyMembers = new List<int>();
+        for (int i = 0; i< allBattlers.Count; i++)
+        {
+            if (allBattlers[i].IsPlayer)
+                partyMembers.Add(i);
+        }
+        return partyMembers[UnityEngine.Random.Range(0,partyMembers.Count)];
     }
+    private int GetRandomEnemy()
+    {
+        List<int> enemyMembers = new List<int>();
+        for (int i = 0; i < allBattlers.Count; i++)
+        {
+            if (!allBattlers[i].IsPlayer)
+                enemyMembers.Add(i);
+        }
+        return enemyMembers[UnityEngine.Random.Range(0, enemyMembers.Count)];
+    }
+    #endregion
 }
 
 [Serializable]

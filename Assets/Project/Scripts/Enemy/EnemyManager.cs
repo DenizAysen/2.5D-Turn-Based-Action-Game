@@ -9,9 +9,25 @@ public class EnemyManager : MonoBehaviour
     [SerializeField] private List<Enemy> currentEnemies;
 
     private const float LEVEL_MODIFIER = 0.5f;
+    private static EnemyManager instance;
     private void Awake()
     {
-        GenerateEnemyByName("Slime", 25);
+        if (instance != null && instance != this)
+            Destroy(gameObject);
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+    public void GenerateEnemiesByEncounter(Encounter[] encounters, int maxNumEnemies)
+    {
+        currentEnemies.Clear();
+        int numEnemies = UnityEngine.Random.Range(1,maxNumEnemies + 1);
+
+        for (int i = 0; i < numEnemies; i++)
+        {
+            Encounter tempEncounter = encounters[UnityEngine.Random.Range(0, encounters.Length)];
+            GenerateEnemyByName(tempEncounter.Enemy.EnemyName, 
+                UnityEngine.Random.Range(tempEncounter.MinLevel, tempEncounter.MaxLevel +1));
+        }
     }
     private void GenerateEnemyByName(string enemyName , int level) 
     {
