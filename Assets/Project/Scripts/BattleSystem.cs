@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BattleSystem : MonoBehaviour
 {
@@ -12,10 +13,16 @@ public class BattleSystem : MonoBehaviour
 
     private int _currentPlayer;
 
+    #region Consts
     private const string ACTION_MESSAGE = "'s Action";
     private const string WIN_MESSAGE = "You win";
     private const string LOSE_MESSAGE = "Your party has been defeated";
-    private const int TURN_DURATION = 2;
+    private const string SUCCESSFULLY_RAN_MESSAGE = "Your party ran away";
+    private const string UNSUCCESSFULLY_RAN_MESSAGE = "Your party failed to run";
+    private const string MAIN_SCENE = "MainScene";
+    private const int RUN_CHANCE = 50;
+    private const int TURN_DURATION = 2; 
+    #endregion
     #endregion
 
     #region Serialized Fields
@@ -49,7 +56,7 @@ public class BattleSystem : MonoBehaviour
         CreateEnemyEntities();
 
         ShowBattleMenu();
-
+        DetermineBattleOrder();
     }
     #region Coroutines
     private IEnumerator BattleRoutine()
@@ -68,7 +75,7 @@ public class BattleSystem : MonoBehaviour
                         yield return StartCoroutine(AttackRoutine(i));
                         break;
                     case Action.Run:
-
+                        yield return StartCoroutine(RunRoutine());
                         break;
 
                     default:
@@ -114,13 +121,13 @@ public class BattleSystem : MonoBehaviour
                     bottomText.text = WIN_MESSAGE;
 
                     yield return new WaitForSeconds(TURN_DURATION);
-                    Debug.Log("Go Back to the Overworld");
+                    SceneManager.LoadScene(MAIN_SCENE);
                 }
             }
           
         }
 
-        else
+        else if (index < allBattlers.Count && allBattlers[index].IsPlayer == false)
         {
             BattleEntities curAttacker = allBattlers[index];
             curAttacker.SetTarget(GetRandomPartyMember());
@@ -146,6 +153,26 @@ public class BattleSystem : MonoBehaviour
             }
         }
         //yield return null;
+    }
+    private IEnumerator RunRoutine()
+    {
+        if(battleState == BattleState.Battle)
+        {
+            if(UnityEngine.Random.Range(1,101) >= RUN_CHANCE)
+            {
+                bottomText.text = SUCCESSFULLY_RAN_MESSAGE;
+                battleState = BattleState.Run;
+                allBattlers.Clear();
+                yield return new WaitForSeconds(TURN_DURATION);
+                SceneManager.LoadScene(MAIN_SCENE);
+                yield break;
+            }
+            else
+            {
+                bottomText.text = UNSUCCESSFULLY_RAN_MESSAGE;
+                yield return new WaitForSeconds(TURN_DURATION);
+            }
+        }
     }
     #endregion
     #region Entities
@@ -252,6 +279,7 @@ public class BattleSystem : MonoBehaviour
         currentTarget.BattleVisuals.PlayHitAnimation();
         currentTarget.UpdateUI();
         bottomText.text = string.Format("{0} attacks {1} for {2} damage", currentAttacker.Name, currentTarget.Name, damage);
+        SaveHealth();
     } 
     private int GetRandomPartyMember()
     {
@@ -274,6 +302,39 @@ public class BattleSystem : MonoBehaviour
         return enemyMembers[UnityEngine.Random.Range(0, enemyMembers.Count)];
     }
     #endregion
+    private void SaveHealth()
+    {
+        for (int i = 0; i < playerBattlers.Count; i++)
+        {
+            _partyManager.SaveHealth(i, playerBattlers[i].CurrentHealth);
+        }
+    }
+    private void DetermineBattleOrder()
+    {
+        allBattlers.Sort((bi1, bi2) => -bi1.Initiative.CompareTo(bi2.Initiative)); 
+    }
+    public void SelectRunAction()
+    {
+        battleState = BattleState.Selection;
+        BattleEntities currentPlayerEntity = playerBattlers[_currentPlayer];
+
+        currentPlayerEntity.battleAction = Action.Run;
+
+        battleMenu.SetActive(false);
+        _currentPlayer++;
+
+        if (_currentPlayer >= playerBattlers.Count)
+        {
+            Debug.Log("Start Battle");
+            StartCoroutine(BattleRoutine());
+
+        }
+        else
+        {
+            enemySelectionMenu.SetActive(false);
+            ShowBattleMenu();
+        }
+    }
 }
 
 [Serializable]

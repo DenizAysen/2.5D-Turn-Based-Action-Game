@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     #region Privates
     private PlayerControls _playerControls;
+    private PartyManager _partyManager;
     private Rigidbody _rigidbody;
     private Vector3 _movement;
     private float _x, _z;
@@ -42,6 +43,11 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        _partyManager = FindObjectOfType<PartyManager>();
+        if(_partyManager.GetPosition() != Vector3.zero)
+        {
+            transform.position = _partyManager.GetPosition();
+        }
     }
     // Update is called once per frame
     void Update()
@@ -79,6 +85,7 @@ public class PlayerController : MonoBehaviour
 
                 if(stepsInGrass >= _stepsToEnCounter)
                 {
+                    _partyManager.SetPosition(transform.position);
                     SceneManager.LoadScene(BATTLE_SCENE);
                 }
             }

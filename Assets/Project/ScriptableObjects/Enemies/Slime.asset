@@ -15,6 +15,6 @@ MonoBehaviour:
   EnemyName: Slime
   BaseHealth: 1
   BaseStr: 1
-  BaseInitiative: 1
+  BaseInitiative: 10
   EnemyVisualPrefab: {fileID: 9190012682090108294, guid: 938f3a3e6a5f72a44b1bfe8121c62b9c,
     type: 3}
