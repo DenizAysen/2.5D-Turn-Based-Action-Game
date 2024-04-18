@@ -67,7 +67,7 @@ public class BattleSystem : MonoBehaviour
 
         for (int i = 0; i < allBattlers.Count; i++)
         {
-            if(battleState == BattleState.Battle)
+            if(battleState == BattleState.Battle && allBattlers[i].CurrentHealth > 0)
             {
                 switch (allBattlers[i].battleAction)
                 {
@@ -84,6 +84,8 @@ public class BattleSystem : MonoBehaviour
                 }
             }          
         }
+        RemoveDeadBattlers();
+
         if (battleState == BattleState.Battle)
         {
             bottomTextPopUp.SetActive(false);
@@ -98,7 +100,7 @@ public class BattleSystem : MonoBehaviour
         if (allBattlers[index].IsPlayer)
         {
             BattleEntities curAttacker = allBattlers[index];
-            if (allBattlers[curAttacker.Target].IsPlayer  || curAttacker.Target >= allBattlers.Count)
+            if (allBattlers[curAttacker.Target].CurrentHealth <= 0)
             {
                 curAttacker.SetTarget(GetRandomEnemy());
             }
@@ -175,6 +177,16 @@ public class BattleSystem : MonoBehaviour
         }
     }
     #endregion
+    private void RemoveDeadBattlers()
+    {
+        for (int i = 0; i < allBattlers.Count; i++)
+        {
+            if (allBattlers[i].CurrentHealth <= 0)
+            {
+                allBattlers.RemoveAt(i);
+            }
+        }
+    }
     #region Entities
     private void CreatePartyEntities()
     {
